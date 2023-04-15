@@ -1,14 +1,12 @@
 NEOTEST_DIR = misc/neotest
 PLENARY_DIR = misc/plenary
 TREESITTER_DIR = misc/treesitter
-TEST_DIR = spec/unit
+TEST_DIR = tests/adapter
 
-test: test_core
-
-test_core: $(NEOTEST_DIR) $(PLENARY_DIR) $(TREESITTER_DIR)
+test: $(NEOTEST_DIR) $(PLENARY_DIR) $(TREESITTER_DIR)
 	nvim --headless --clean \
-	-u spec/minimal_init.lua \
-	-c "PlenaryBustedDirectory $(TEST_DIR)/core { minimal_init = 'spec/minimal_init.lua' }"
+	-u $(TEST_DIR)/minimal_init.lua \
+	-c "PlenaryBustedDirectory $(TEST_DIR) { minimal_init = 'tests/adapter/minimal_init.lua' }"
 
 $(NEOTEST_DIR):
 	git clone --depth=1 --no-single-branch https://github.com/nvim-neotest/neotest $(NEOTEST_DIR)

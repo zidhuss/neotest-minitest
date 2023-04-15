@@ -15,7 +15,4 @@ require("neotest").setup({
   adapters = {
     require("neotest-minitest"),
   },
-  consumers = {
-    adapter_testing = require("neotest-minitest.consumers.adapter_testing"),
-  },
 })

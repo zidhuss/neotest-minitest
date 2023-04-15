@@ -30,4 +30,31 @@ function NeotestAdapter.filter_dir(name, rel_path, root)
   return false
 end
 
+---Given a file path, parse all the tests within it.
+---@async
+---@param file_path string Absolute file path
+---@return neotest.Tree | nil
+function NeotestAdapter.discover_positions(file_path)
+  local query = [[
+    ; Classes that inherit from Minitest::Test
+    ((
+      class
+      name: (constant) @namespace.name
+      (superclass (scope_resolution) @superclass (#match? @superclass "^Minitest::Test"))
+    )) @namespace.definition
+
+    ; Methods that begin with test_
+    ((
+      method
+      name: (identifier) @test.name (#match? @test.name "^test_")
+    )) @test.definition
+  ]]
+
+  return lib.treesitter.parse_positions(file_path, query, {
+    nested_tests = true,
+    require_namespaces = true,
+    position_id = "require('neotest-minitest.utils').generate_treesitter_id",
+  })
+end
+
 return NeotestAdapter
