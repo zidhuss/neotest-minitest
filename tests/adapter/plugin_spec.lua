@@ -1,7 +1,7 @@
 local plugin = require("neotest-minitest")
 
 describe("is_test_file", function()
-  it("matches rspec files", function()
+  it("matches test files", function()
     assert.equals(true, plugin.is_test_file("./test/foo_test.rb"))
   end)
 
