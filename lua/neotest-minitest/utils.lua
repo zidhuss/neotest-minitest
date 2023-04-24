@@ -27,11 +27,43 @@ M.generate_treesitter_id = function(position)
   -- Treesitter starts line numbers from 0 so we subtract 1
   local id = test_path .. separator .. (tonumber(position.range[1]) + 1)
 
-  logger.debug("Cwd:", { cwd })
-  logger.debug("Path to test file:", { position.path })
-  logger.debug("Treesitter id:", { id })
-
   return id
+end
+
+M.full_test_name = function(tree)
+  local name = tree:data().name
+  local parent_tree = tree:parent()
+  if not parent_tree or parent_tree:data().type == "file" then return name end
+  local parent_name = parent_tree:data().name
+
+  -- if the parent name starts with a single quote, then we need to add the test_ prefix.
+  -- This generates the corrent name for spec test
+  if name.sub(name, 1, 1) == "'" then name = "test_" .. name end
+
+  return parent_name .. "#" .. name:gsub("'", ""):gsub(" ", "_")
+end
+
+M.get_mappings = function(tree)
+  -- get the mappings for the current node and its children
+  local mappings = {}
+  local function name_map(tree)
+    local data = tree:data()
+    if data.type == "test" then
+      local full_name = M.full_test_name(tree, data.name)
+      mappings[full_name] = data.id
+    end
+
+    for _, child in ipairs(tree:children()) do
+      name_map(child)
+    end
+  end
+  name_map(tree)
+
+  return mappings
+end
+
+M.strip_ansi_escape_codes = function(str)
+  return str:gsub("\27%[%d+m", "")
 end
 
 return M
