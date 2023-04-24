@@ -1,7 +1,6 @@
 local lib = require("neotest.lib")
 local logger = require("neotest.logging")
-local ok, async = pcall(require, "nio")
-if not ok then async = require("neotest.async") end
+local async = require("neotest.async")
 
 local utils = require("neotest-minitest.utils")
 

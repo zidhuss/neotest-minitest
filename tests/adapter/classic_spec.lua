@@ -1,5 +1,5 @@
 local plugin = require("neotest-minitest")
-local async = require("plenary.async.tests")
+local async = require("nio.tests")
 
 describe("Classic Test", function()
   describe("discovers_positions", function()
