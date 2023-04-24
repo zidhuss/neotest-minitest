@@ -12,10 +12,6 @@ jobs:
         with:
           neovim: true
 
-      - name: Install tree-sitter CLI
-        run: |
-          npm install -g tree-sitter-cli
-
       - name: Install dependencies
         run: |
           sudo apt-get update
