@@ -47,7 +47,7 @@ ClassicTest#test_addition = 0.00 s = F
 
 
 Failure:
-ClassicTest#test_addition [/Users/abry/src/nvim-neotest/neotest-minitest/tests/minitest_examples/classic_test.rb:7]:
+ClassicTest#test_addition [/neotest-minitest/tests/minitest_examples/classic_test.rb:7]:
 Expected: 3
   Actual: 2
 
@@ -83,7 +83,7 @@ ClassicTest#test_subtraction = 0.00 s = F
 
 
 Failure:
-ClassicTest#test_subtraction [/Users/abry/src/nvim-neotest/neotest-minitest/tests/minitest_examples/classic_test.rb:10]:
+ClassicTest#test_subtraction [/neotest-minitest/tests/minitest_examples/classic_test.rb:10]:
 Expected: 1
   Actual: 0
 
@@ -115,7 +115,7 @@ ClassicTest#test_addition = 0.00 s = F
 
 
 Failure:
-ClassicTest#test_addition [/Users/abry/src/nvim-neotest/neotest-minitest/tests/minitest_examples/classic_test.rb:7]:
+ClassicTest#test_addition [/neotest-minitest/tests/minitest_examples/classic_test.rb:7]:
 Expected: 5
   Actual: 2
 
@@ -126,7 +126,7 @@ ClassicTest#test_subtraction = 0.00 s = F
 
 
 Failure:
-ClassicTest#test_subtraction [/Users/abry/src/nvim-neotest/neotest-minitest/tests/minitest_examples/classic_test.rb:10]:
+ClassicTest#test_subtraction [/neotest-minitest/tests/minitest_examples/classic_test.rb:10]:
 Expected: 1
   Actual: 0
 
