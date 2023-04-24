@@ -20,21 +20,47 @@ describe("generate_treesitter_id", function()
 end)
 
 describe("full_test_name", function()
-  it("returns the name of the test", function()
-    local tree = Tree.from_list({ id = "test", name = "test" }, function(pos)
-      return pos.id
-    end)
+  describe("name has no quotes", function()
+    it("returns the name of the test", function()
+      local tree = Tree.from_list({ id = "test", name = "test" }, function(pos)
+        return pos.id
+      end)
 
-    assert.equals("test", utils.full_test_name(tree))
-  end)
-  it("returns the name of the test with the parent namespace", function()
-    local tree = Tree.from_list({
-      { id = "namespace", name = "namespace", type = "namespace" },
-      { id = "test", name = "test" },
-    }, function(pos)
-      return pos.id
+      assert.equals("test", utils.full_test_name(tree))
     end)
-    assert.equals("namespace#test", utils.full_test_name(tree:children()[1]))
+    it("returns the name of the test with the parent namespace", function()
+      local tree = Tree.from_list({
+        { id = "namespace", name = "namespace", type = "namespace" },
+        { id = "test", name = "test" },
+      }, function(pos)
+        return pos.id
+      end)
+      assert.equals("namespace#test", utils.full_test_name(tree:children()[1]))
+    end)
+  end)
+
+  describe("name has single quotes", function()
+    it("returns the name of the test with the parent namespace", function()
+      local tree = Tree.from_list({
+        { id = "namespace", name = "namespace", type = "namespace" },
+        { id = "test", name = "'addition'" },
+      }, function(pos)
+        return pos.id
+      end)
+      assert.equals("namespace#test_addition", utils.full_test_name(tree:children()[1]))
+    end)
+  end)
+
+  describe("name has double quotes", function()
+    it("returns the name of the test with the parent namespace", function()
+      local tree = Tree.from_list({
+        { id = "namespace", name = "namespace", type = "namespace" },
+        { id = "test", name = '"addition"' },
+      }, function(pos)
+        return pos.id
+      end)
+      assert.equals("namespace#test_addition", utils.full_test_name(tree:children()[1]))
+    end)
   end)
 end)
 
