@@ -8,10 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Neovim
-        run: |
-          wget -q https://github.com/neovim/neovim/releases/download/v0.8.3/nvim-linux64.deb -O /tmp/nvim.deb
-          sudo dpkg -i /tmp/nvim.deb
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
 
       - name: Install tree-sitter CLI
         run: |
