@@ -77,6 +77,8 @@ describe("get_mappings", function()
       return pos.id
     end)
 
+    local mappings = utils.get_mappings(tree)
+
     assert.equals("namespace_test_example", mappings["namespace#test_example"])
   end)
 
