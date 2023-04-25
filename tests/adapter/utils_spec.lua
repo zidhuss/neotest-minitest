@@ -20,47 +20,51 @@ describe("generate_treesitter_id", function()
 end)
 
 describe("full_test_name", function()
-  describe("name has no quotes", function()
-    it("returns the name of the test", function()
-      local tree = Tree.from_list({ id = "test", name = "test" }, function(pos)
-        return pos.id
-      end)
-
-      assert.equals("test", utils.full_test_name(tree))
+  it("returns the name of the test", function()
+    local tree = Tree.from_list({ id = "test", name = "test_example" }, function(pos)
+      return pos.id
     end)
-    it("returns the name of the test with the parent namespace", function()
-      local tree = Tree.from_list({
-        { id = "namespace", name = "namespace", type = "namespace" },
-        { id = "test", name = "test" },
-      }, function(pos)
-        return pos.id
-      end)
-      assert.equals("namespace#test", utils.full_test_name(tree:children()[1]))
-    end)
+    assert.equals("test_example", utils.full_test_name(tree))
   end)
 
-  describe("name has single quotes", function()
-    it("returns the name of the test with the parent namespace", function()
-      local tree = Tree.from_list({
-        { id = "namespace", name = "namespace", type = "namespace" },
-        { id = "test", name = "'addition'" },
-      }, function(pos)
-        return pos.id
-      end)
-      assert.equals("namespace#test_addition", utils.full_test_name(tree:children()[1]))
+  it("returns the name of the test with the parent namespace", function()
+    local tree = Tree.from_list({
+      { id = "namespace", name = "namespace", type = "namespace" },
+      { id = "test", name = "example" },
+    }, function(pos)
+      return pos.id
     end)
+    assert.equals("namespace#test_example", utils.full_test_name(tree:children()[1]))
   end)
 
-  describe("name has double quotes", function()
-    it("returns the name of the test with the parent namespace", function()
-      local tree = Tree.from_list({
-        { id = "namespace", name = "namespace", type = "namespace" },
-        { id = "test", name = '"addition"' },
-      }, function(pos)
-        return pos.id
-      end)
-      assert.equals("namespace#test_addition", utils.full_test_name(tree:children()[1]))
+  it("prefixes the test with test_", function()
+    local tree = Tree.from_list({
+      { id = "namespace", name = "namespace", type = "namespace" },
+      { id = "test", name = "example" },
+    }, function(pos)
+      return pos.id
     end)
+    assert.equals("namespace#test_example", utils.full_test_name(tree:children()[1]))
+  end)
+
+  it("replaces spaces with underscores", function()
+    local tree = Tree.from_list({
+      { id = "namespace", name = "namespace", type = "namespace" },
+      { id = "test", name = "this is a great test name" },
+    }, function(pos)
+      return pos.id
+    end)
+    assert.equals("namespace#test_this_is_a_great_test_name", utils.full_test_name(tree:children()[1]))
+  end)
+
+  it("shouldn't replace the quotes inside the test name", function()
+    local tree = Tree.from_list({
+      { id = "namespace", name = "namespace", type = "namespace" },
+      { id = "test", name = "shouldn't remove our single quote" },
+    }, function(pos)
+      return pos.id
+    end)
+    assert.equals("namespace#test_shouldn't_remove_our_single_quote", utils.full_test_name(tree:children()[1]))
   end)
 end)
 
@@ -68,14 +72,12 @@ describe("get_mappings", function()
   it("gives full test name for nodes of tree", function()
     local tree = Tree.from_list({
       { id = "namespace", name = "namespace", type = "namespace" },
-      { id = "namespace_test", name = "test", type = "test" },
+      { id = "namespace_test_example", name = "test_example", type = "test" },
     }, function(pos)
       return pos.id
     end)
 
-    local mappings = utils.get_mappings(tree)
-
-    assert.equals("namespace_test", mappings["namespace#test"])
+    assert.equals("namespace_test_example", mappings["namespace#test_example"])
   end)
 
   it("give test name with no nesting", function()

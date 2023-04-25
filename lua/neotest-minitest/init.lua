@@ -63,7 +63,7 @@ function NeotestAdapter.discover_positions(file_path)
     ((
       call
       method: (identifier) @func_name (#match? @func_name "^(test)$")
-      arguments: (argument_list (_) @test.name)
+      arguments: (argument_list (string (string_content) @test.name))
     )) @test.definition
 
   ]]

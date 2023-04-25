@@ -36,11 +36,10 @@ M.full_test_name = function(tree)
   if not parent_tree or parent_tree:data().type == "file" then return name end
   local parent_name = parent_tree:data().name
 
-  -- if the parent name starts with a quotes, then we need to add the test_ prefix.
-  -- This generates the correct name for spec test
-  if name:sub(1, 1) == "'" or name:sub(1, 1) == '"' then name = "test_" .. name end
+  -- For rails and spec tests
+  if not name:match("^test_") then name = "test_" .. name end
 
-  return parent_name .. "#" .. name:gsub("['\"]", ""):gsub(" ", "_")
+  return parent_name .. "#" .. name:gsub(" ", "_")
 end
 
 M.get_mappings = function(tree)
@@ -49,7 +48,7 @@ M.get_mappings = function(tree)
   local function name_map(tree)
     local data = tree:data()
     if data.type == "test" then
-      local full_name = M.full_test_name(tree, data.name)
+      local full_name = M.full_test_name(tree)
       mappings[full_name] = data.id
     end
 
