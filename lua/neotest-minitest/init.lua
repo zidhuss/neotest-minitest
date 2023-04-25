@@ -96,11 +96,15 @@ function NeotestAdapter.build_spec(args)
     table.insert(script_args, "/" .. full_name:gsub("%#", "\\#") .. "/")
   end
 
+  local function run_dir()
+    table.insert(script_args, position.path .. "/**/*_test.rb")
+  end
+
   if position.type == "file" then run_by_filename() end
 
-  if position.type == "test" or (position.type == "namespace" and vim.bo.filetype ~= "neotest-summary") then
-    run_by_name()
-  end
+  if position.type == "test" or position.type == "namespace" then run_by_name() end
+
+  if position.type == "dir" then return run_dir() end
 
   local ruby_cmd = vim.tbl_flatten({
     "bundle",
