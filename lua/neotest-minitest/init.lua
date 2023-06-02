@@ -57,7 +57,7 @@ function NeotestAdapter.discover_positions(file_path)
     ((
         class
         name: (constant) @namespace.name
-        (superclass (scope_resolution) @superclass (#match? @superclass "ActiveSupport::TestCase$"))
+        (superclass (scope_resolution) @superclass (#match? @superclass "(ActionDispatch::IntegrationTest|ActiveSupport::TestCase)$"))
     )) @namespace.definition
 
     ((
@@ -132,7 +132,7 @@ end
 
 function NeotestAdapter._parse_test_output(output, name_mappings)
   local results = {}
-  local test_pattern = "(%w+#[%w_]+)%s*=%s*[%d.]+%s*s%s*=%s*([F.])"
+  local test_pattern = "(%w+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([F.])"
   local error_pattern = "Failure:%s*([%w#_]+)%s*%[([^%]]+)%]:%s*Expected:%s*(.-)%s*Actual:%s*(.-)%s\n\n"
 
   for test_name, status in string.gmatch(output, test_pattern) do
