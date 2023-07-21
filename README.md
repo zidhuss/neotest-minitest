@@ -4,7 +4,31 @@ This plugin provides a [minitest](https://docs.seattlerb.org/minitest/) adapter 
 
 ## :package: Installation
 
-Install the plugin using packer:
+Install with the package manager of your choice:
+
+**Lazy**
+
+```lua
+{
+  "nvim-neotest/neotest",
+  lazy = true,
+  dependencies = {
+    ...,
+    "zidhuss/neotest-minitest",
+  },
+  config = function()
+    require("neotest").setup({
+      ...,
+      adapters = {
+        require("neotest-minitest")
+      },
+    }
+  end
+}
+```
+
+<details>
+    <summary><strong>Packer</strong></summary>
 
 ```lua
 use({
@@ -23,6 +47,7 @@ use({
   end
 })
 ```
+</details>
 
 ## :wrench: Configuration
 
