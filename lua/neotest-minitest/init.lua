@@ -2,6 +2,7 @@ local lib = require("neotest.lib")
 local logger = require("neotest.logging")
 local async = require("neotest.async")
 
+local config = require("neotest-minitest.config")
 local utils = require("neotest-minitest.utils")
 
 ---@class neotest.Adapter
@@ -106,15 +107,8 @@ function NeotestAdapter.build_spec(args)
 
   if position.type == "dir" then return run_dir() end
 
-  local ruby_cmd = vim.tbl_flatten({
-    "bundle",
-    "exec",
-    "ruby",
-    "-Itest",
-  })
-
   local command = vim.tbl_flatten({
-    ruby_cmd,
+    config.get_test_cmd(),
     script_args,
     "-v",
   })
@@ -178,5 +172,22 @@ function NeotestAdapter.results(spec, result, tree)
 
   return results
 end
+
+local is_callable = function(obj)
+  return type(obj) == "function" or (type(obj) == "table" and obj.__call)
+end
+
+setmetatable(NeotestAdapter, {
+  __call = function(_, opts)
+    if is_callable(opts.test_cmd) then
+      config.get_test_cmd = opts.test_cmd
+    elseif opts.test_cmd then
+      config.get_test_cmd = function()
+        return opts.test_cmd
+      end
+    end
+    return NeotestAdapter
+  end,
+})
 
 return NeotestAdapter

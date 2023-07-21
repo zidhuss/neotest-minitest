@@ -51,7 +51,46 @@ use({
 
 ## :wrench: Configuration
 
-> TODO
+### Default configuration
+
+> **Note**: You only need to the call the `setup` function if you wish to change any of the defaults
+
+<details>
+  <summary>Show default configuration</summary>
+
+```lua
+adapters = {
+  require("neotest-minitest")({
+    test_cmd = function()
+      return vim.tbl_flatten({
+        "bundle",
+        "exec",
+        "ruby",
+        "-Itest",
+      })
+    end,
+  }),
+}
+```
+
+</details>
+
+### The test command
+
+The command used to run tests can be changed via the `test_cmd` option e.g.
+
+```lua
+require("neotest-minitest")({
+  test_cmd = function()
+    return vim.tbl_flatten({
+      "bundle",
+      "exec",
+      "rails",
+      "test",
+    })
+  end
+})
+```
 
 ## :rocket: Usage
 
