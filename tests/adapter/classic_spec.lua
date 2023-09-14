@@ -77,6 +77,90 @@ ClassicTest#test_addition = 0.00 s = .
       end)
     end)
 
+    describe("single error test", function()
+      local output = [[
+ClassicTest#test_error = 0.00 s = E
+
+Finished in 0.000627s, 1594.8960 runs/s, 0.0000 assertions/s.
+
+  1) Error:
+ClassicTest#test_error:
+NameError: uninitialized constant ClassicTest::Unknown
+
+    assert_equal false, Unknown.function
+                        ^^^^^^^
+    /Users/abry/src/nvim-neotest/neotest-minitest/tests/minitest_examples/classic_test.rb:9:in `test_error'
+]]
+
+      it("parses the results correctly", function()
+        local results = plugin._parse_test_output(output, { ["ClassicTest#test_error"] = "testing" })
+        assert.are.same({
+          ["testing"] = {
+            status = "failed",
+            errors = {
+              {
+                message = "NameError: uninitialized constant ClassicTest::Unknown",
+                line = 8,
+              },
+            },
+          },
+        }, results)
+      end)
+    end)
+
+    describe("multiple error tests", function()
+      local output = [[
+ClassicTest#test_error = 0.00 s = E
+ClassicTest#test_error2 = 0.00 s = E
+Run options: -v --seed 44295
+
+
+  1) Error:
+ClassicTest#test_error:
+NameError: uninitialized constant ClassicTest::Unknown
+
+    assert_equal false, Unknown.function
+                        ^^^^^^^
+    /Users/abry/src/nvim-neotest/neotest-minitest/tests/minitest_examples/classic_test.rb:7:in `test_error'
+
+  2) Error:
+ClassicTest#test_error2:
+NameError: uninitialized constant ClassicTest::Unknown
+
+    assert_equal false, Unknown.function
+                        ^^^^^^^
+    /Users/abry/src/nvim-neotest/neotest-minitest/tests/minitest_examples/classic_test.rb:11:in `test_error2'
+]]
+
+      it("parses the results correctly", function()
+        local results = plugin._parse_test_output(output, {
+          ["ClassicTest#test_error"] = "testing_error",
+          ["ClassicTest#test_error2"] = "testing_error2",
+        })
+
+        assert.are.same({
+          ["testing_error"] = {
+            status = "failed",
+            errors = {
+              {
+                message = "NameError: uninitialized constant ClassicTest::Unknown",
+                line = 6,
+              },
+            },
+          },
+          ["testing_error2"] = {
+            status = "failed",
+            errors = {
+              {
+                message = "NameError: uninitialized constant ClassicTest::Unknown",
+                line = 10,
+              },
+            },
+          },
+        }, results)
+      end)
+    end)
+
     describe("failing and passing tests", function()
       local output = [[
 ClassicTest#test_subtraction = 0.00 s = F
