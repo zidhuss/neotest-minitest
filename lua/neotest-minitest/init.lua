@@ -126,17 +126,18 @@ end
 
 function NeotestAdapter._parse_test_output(output, name_mappings)
   local results = {}
-  local test_pattern = "(%w+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([F.])"
-  local error_pattern = "Failure:%s*([%w#_]+)%s*%[([^%]]+)%]:%s*Expected:%s*(.-)%s*Actual:%s*(.-)%s\n\n"
+  local test_pattern = "(%w+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
+  local failure_pattern = "Failure:%s*([%w#_]+)%s*%[([^%]]+)%]:%s*Expected:%s*(.-)%s*Actual:%s*(.-)%s\n\n"
+  local error_pattern = "Error:%s*([%w#_]+):%s*(.-)\n[%w%W]-%.rb:(%d+):"
 
   for test_name, status in string.gmatch(output, test_pattern) do
     local pos_id = name_mappings[test_name]
     results[pos_id] = {
-      status = status == "F" and "failed" or "passed",
+      status = status == "." and "passed" or "failed",
     }
   end
 
-  for test_name, filepath, expected, actual in string.gmatch(output, error_pattern) do
+  for test_name, filepath, expected, actual in string.gmatch(output, failure_pattern) do
     local line = tonumber(string.match(filepath, ":(%d+)$"))
     local message = string.format("Expected: %s\n  Actual: %s", expected, actual)
     local pos_id = name_mappings[test_name]
@@ -147,6 +148,20 @@ function NeotestAdapter._parse_test_output(output, name_mappings)
         {
           message = message,
           line = line,
+        },
+      }
+    end
+  end
+
+  for test_name, message, line_str in string.gmatch(output, error_pattern) do
+    local line = tonumber(line_str)
+    local pos_id = name_mappings[test_name]
+    if results[pos_id] then
+      results[pos_id].status = "failed"
+      results[pos_id].errors = {
+        {
+          message = message,
+          line = line - 1, -- neovim lines are 0 indexed
         },
       }
     end
