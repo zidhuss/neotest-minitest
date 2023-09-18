@@ -71,6 +71,47 @@ Expected: 4
       end)
     end)
 
+    describe("single passing test with ruby error", function()
+      local output = [[
+Traceback (most recent call last):
+        1: from tests/minitest_examples/rails_unit_erroring_test.rb:1:in `<main>'
+tests/minitest_examples/rails_unit_erroring_test.rb:1:in `require': cannot load such file -- non_exising_file (LoadError)
+      ]]
+
+      it("parses the results correctly", function()
+        local results = plugin._parse_test_output(output, { ["RailsUnitErroringTest#test_addition"] = "testing" })
+
+        assert.are.same(
+          {
+            ["testing"] = { status = "failed", errors = {
+              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 1 } } }
+          }, results)
+      end)
+    end)
+
+    describe("multiple tests with ruby error", function()
+      local output = [[
+Traceback (most recent call last):
+        1: from tests/minitest_examples/rails_unit_erroring_test.rb:1:in `<main>'
+tests/minitest_examples/rails_unit_erroring_test.rb:1:in `require': cannot load such file -- non_exising_file (LoadError)
+      ]]
+
+      it("parses the results correctly", function()
+        local results = plugin._parse_test_output(output, {
+          ["RailsUnitErroringTest#test_addition"] = "testing",
+          ["RailsUnitTest#test_subtracts_two_numbers"] = "testing1"
+        })
+
+        assert.are.same(
+          {
+            ["testing"] = { status = "failed", errors = {
+              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 1 } } },
+            ["testing1"] = { status = "failed", errors = {
+              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 1 } } }
+          }, results)
+      end)
+    end)
+
     describe("single passing test", function()
       local output = [[
 RailsUnitTest#test_subtracts_two_numbers = 0.00 s = .
