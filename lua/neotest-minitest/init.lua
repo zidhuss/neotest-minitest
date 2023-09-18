@@ -139,7 +139,7 @@ function NeotestAdapter._parse_test_output(output, name_mappings)
         errors = {
           {
             message = message,
-            line = line,
+            line = line - 1,
           },
         },
       }

@@ -84,7 +84,7 @@ tests/minitest_examples/rails_unit_erroring_test.rb:1:in `require': cannot load 
         assert.are.same(
           {
             ["testing"] = { status = "failed", errors = {
-              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 1 } } }
+              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 0 } } }
           }, results)
       end)
     end)
@@ -105,9 +105,9 @@ tests/minitest_examples/rails_unit_erroring_test.rb:1:in `require': cannot load 
         assert.are.same(
           {
             ["testing"] = { status = "failed", errors = {
-              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 1 } } },
+              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 0 } } },
             ["testing1"] = { status = "failed", errors = {
-              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 1 } } }
+              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 0 } } }
           }, results)
       end)
     end)
