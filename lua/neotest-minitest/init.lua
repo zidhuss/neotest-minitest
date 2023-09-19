@@ -129,6 +129,22 @@ function NeotestAdapter._parse_test_output(output, name_mappings)
   local test_pattern = "(%w+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
   local failure_pattern = "Failure:%s*([%w#_]+)%s*%[([^%]]+)%]:%s*Expected:%s*(.-)%s*Actual:%s*(.-)%s\n\n"
   local error_pattern = "Error:%s*([%w#_]+):%s*(.-)\n[%w%W]-%.rb:(%d+):"
+  local traceback_pattern = "(%d+:[^:]+:%d+:in `[^']+')%s+([^:]+):(%d+):(in `[^']+':[^\n]+)"
+
+  for last_traceback, file_name, line_str, message in string.gmatch(output, traceback_pattern) do
+    local line = tonumber(line_str)
+    for _, pos_id in pairs(name_mappings) do
+      results[pos_id] = {
+        status = "failed",
+        errors = {
+          {
+            message = message,
+            line = line - 1,
+          },
+        },
+      }
+    end
+  end
 
   for test_name, status in string.gmatch(output, test_pattern) do
     local pos_id = name_mappings[test_name]
