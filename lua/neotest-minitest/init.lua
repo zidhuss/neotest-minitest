@@ -58,7 +58,7 @@ function NeotestAdapter.discover_positions(file_path)
     ((
         class
         name: (constant) @namespace.name
-        (superclass (scope_resolution) @superclass (#match? @superclass "(ActionDispatch::IntegrationTest|ActiveSupport::TestCase)$"))
+        (superclass (scope_resolution) @superclass (#match? @superclass "(::IntegrationTest|::TestCase)$"))
     )) @namespace.definition
 
     ((
