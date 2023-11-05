@@ -148,9 +148,10 @@ function NeotestAdapter._parse_test_output(output, name_mappings)
 
   for test_name, status in string.gmatch(output, test_pattern) do
     local pos_id = name_mappings[test_name]
-    results[pos_id] = {
+
+    if pos_id then results[pos_id] = {
       status = status == "." and "passed" or "failed",
-    }
+    } end
   end
 
   for test_name, filepath, expected, actual in string.gmatch(output, failure_pattern) do
