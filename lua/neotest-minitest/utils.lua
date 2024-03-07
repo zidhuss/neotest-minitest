@@ -42,6 +42,11 @@ M.full_test_name = function(tree)
   return parent_name .. "#" .. name:gsub(" ", "_")
 end
 
+M.escaped_full_test_name = function(tree)
+  local full_name = M.full_test_name(tree)
+  return full_name:gsub("([?#])", "\\%1")
+end
+
 M.get_mappings = function(tree)
   -- get the mappings for the current node and its children
   local mappings = {}
