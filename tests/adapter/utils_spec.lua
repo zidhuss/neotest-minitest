@@ -68,6 +68,38 @@ describe("full_test_name", function()
   end)
 end)
 
+describe("escaped_full_test_name", function()
+  it("escapes # characters", function()
+    local tree = Tree.from_list({
+      { id = "namespace", name = "namespace", type = "namespace" },
+      { id = "test", name = "#escaped_full_test_name should be escaped" },
+    }, function(pos)
+      return pos.id
+    end)
+    assert.equals("namespace\\#test_\\#escaped_full_test_name_should_be_escaped", utils.escaped_full_test_name(tree:children()[1]))
+  end)
+
+  it("escapes ? characters", function()
+    local tree = Tree.from_list({
+      { id = "namespace", name = "namespace", type = "namespace" },
+      { id = "test", name = "escaped? should be escaped" },
+    }, function(pos)
+      return pos.id
+    end)
+    assert.equals("namespace\\#test_escaped\\?_should_be_escaped", utils.escaped_full_test_name(tree:children()[1]))
+  end)
+
+  it("escapes multiple ? and # characters", function()
+    local tree = Tree.from_list({
+      { id = "namespace", name = "namespace", type = "namespace" },
+      { id = "test", name = "#escaped? should be escaped" },
+    }, function(pos)
+      return pos.id
+    end)
+    assert.equals("namespace\\#test_\\#escaped\\?_should_be_escaped", utils.escaped_full_test_name(tree:children()[1]))
+  end)
+end)
+
 describe("get_mappings", function()
   it("gives full test name for nodes of tree", function()
     local tree = Tree.from_list({

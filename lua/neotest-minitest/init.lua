@@ -90,11 +90,11 @@ function NeotestAdapter.build_spec(args)
   end
 
   local function run_by_name()
-    local full_name = utils.full_test_name(args.tree, position.name)
+    local full_name = utils.escaped_full_test_name(args.tree, position.name)
     table.insert(script_args, position.path)
     table.insert(script_args, "--name")
     -- https://chriskottom.com/articles/command-line-flags-for-minitest-in-the-raw/
-    table.insert(script_args, "/" .. full_name:gsub("%#", "\\#") .. "/")
+    table.insert(script_args, "/" .. full_name .. "/")
   end
 
   local function run_dir()
