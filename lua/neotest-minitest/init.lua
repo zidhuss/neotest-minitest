@@ -30,9 +30,7 @@ end
 ---@param root string Root directory of project
 ---@return boolean
 function NeotestAdapter.filter_dir(name, rel_path, root)
-  local _, count = rel_path:gsub("/", "")
-  if rel_path:match("test") or count < 1 then return true end
-  return false
+  return name ~= "vendor"
 end
 
 ---Given a file path, parse all the tests within it.
