@@ -11,9 +11,6 @@ describe("is_test_file", function()
 end)
 
 describe("filter_dir", function()
-  -- note that even though these tests suggest that `engine/things/spec` would be approved,
-  -- `engine/things` would return false, so `engine/things/spec` would never be searched by
-  -- neotest
   local root = "/home/name/projects"
   it("allows test", function()
     assert.equals(true, plugin.filter_dir("test", "test", root))
@@ -27,7 +24,10 @@ describe("filter_dir", function()
   it("allows a long path with test at the start", function()
     assert.equals(true, plugin.filter_dir("billing_service", "test/controllers/billing_service", root))
   end)
-  it("disallows paths without test, more that one sub dir deep", function()
-    assert.equals(false, plugin.filter_dir("models", "app/models", root))
+  it("allows paths without test, more that one sub dir deep", function()
+    assert.equals(true, plugin.filter_dir("models", "app/models", root))
+  end)
+  it("disallows the vendor directory", function()
+    assert.equals(false, plugin.filter_dir("vendor", "vendor", root))
   end)
 end)
