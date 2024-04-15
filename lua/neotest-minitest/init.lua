@@ -124,9 +124,9 @@ end
 
 function NeotestAdapter._parse_test_output(output, name_mappings)
   local results = {}
-  local test_pattern = "(%w+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
+  local test_pattern = "([a-zA-Z0-9:]+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
   local failure_pattern = "Failure:%s*([%w#_]+)%s*%[([^%]]+)%]:%s*Expected:%s*(.-)%s*Actual:%s*(.-)%s\n\n"
-  local error_pattern = "Error:%s*([%w#_]+):%s*(.-)\n[%w%W]-%.rb:(%d+):"
+  local error_pattern = "Error:%s*([%w:#_]+):%s*(.-)\n[%w%W]-%.rb:(%d+):"
   local traceback_pattern = "(%d+:[^:]+:%d+:in `[^']+')%s+([^:]+):(%d+):(in `[^']+':[^\n]+)"
 
   for last_traceback, file_name, line_str, message in string.gmatch(output, traceback_pattern) do
