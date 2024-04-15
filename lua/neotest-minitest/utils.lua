@@ -18,6 +18,16 @@ local function replace_paths(str, what, with)
   return string.gsub(str, what, with)
 end
 
+-- We are considering test class names without their module, but
+-- Lua's built-in pattern matching isn't powerful enough to do so. Instead
+-- we match on the full name, including module, and strip it off here.
+--
+-- @param test_name string
+-- @return string
+M.replace_module_namespace = function(test_name)
+  return test_name.gsub(test_name, "%w+::", "")
+end
+
 ---@param position neotest.Position The position to return an ID for
 ---@param namespace neotest.Position[] Any namespaces the position is within
 ---@return string
