@@ -65,7 +65,7 @@ Expected: 4
         local results = plugin._parse_test_output(output, { ["RailsUnitTest#test_adds_two_numbers"] = "testing" })
 
         assert.are.same(
-          { ["testing"] = { status = "failed", errors = { { message = "Expected: 4\n  Actual: 5", line = 8 } } } },
+          { ["testing"] = { status = "failed", errors = { { message = "Expected: 4\n  Actual: 5", line = 7 } } } },
           results
         )
       end)
@@ -81,11 +81,14 @@ tests/minitest_examples/rails_unit_erroring_test.rb:1:in `require': cannot load 
       it("parses the results correctly", function()
         local results = plugin._parse_test_output(output, { ["RailsUnitErroringTest#test_addition"] = "testing" })
 
-        assert.are.same(
-          {
-            ["testing"] = { status = "failed", errors = {
-              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 0 } } }
-          }, results)
+        assert.are.same({
+          ["testing"] = {
+            status = "failed",
+            errors = {
+              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 0 },
+            },
+          },
+        }, results)
       end)
     end)
 
@@ -99,16 +102,23 @@ tests/minitest_examples/rails_unit_erroring_test.rb:1:in `require': cannot load 
       it("parses the results correctly", function()
         local results = plugin._parse_test_output(output, {
           ["RailsUnitErroringTest#test_addition"] = "testing",
-          ["RailsUnitTest#test_subtracts_two_numbers"] = "testing1"
+          ["RailsUnitTest#test_subtracts_two_numbers"] = "testing1",
         })
 
-        assert.are.same(
-          {
-            ["testing"] = { status = "failed", errors = {
-              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 0 } } },
-            ["testing1"] = { status = "failed", errors = {
-              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 0 } } }
-          }, results)
+        assert.are.same({
+          ["testing"] = {
+            status = "failed",
+            errors = {
+              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 0 },
+            },
+          },
+          ["testing1"] = {
+            status = "failed",
+            errors = {
+              { message = "in `require': cannot load such file -- non_exising_file (LoadError)", line = 0 },
+            },
+          },
+        }, results)
       end)
     end)
 
@@ -145,7 +155,7 @@ Expected: 4
         })
 
         assert.are.same({
-          ["testing"] = { status = "failed", errors = { { message = "Expected: 4\n  Actual: 5", line = 8 } } },
+          ["testing"] = { status = "failed", errors = { { message = "Expected: 4\n  Actual: 5", line = 7 } } },
           ["testing2"] = { status = "passed" },
         }, results)
       end)
@@ -181,8 +191,8 @@ Expected: 1
         })
 
         assert.are.same({
-          ["testing"] = { status = "failed", errors = { { message = "Expected: 4\n  Actual: 5", line = 8 } } },
-          ["testing2"] = { status = "failed", errors = { { message = "Expected: 1\n  Actual: 2", line = 11 } } },
+          ["testing"] = { status = "failed", errors = { { message = "Expected: 4\n  Actual: 5", line = 7 } } },
+          ["testing2"] = { status = "failed", errors = { { message = "Expected: 1\n  Actual: 2", line = 10 } } },
         }, results)
       end)
     end)

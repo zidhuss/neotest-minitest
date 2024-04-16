@@ -1,0 +1,20 @@
+Running 3 tests in a single process (parallelization threshold is 50)
+Run options: --name /UserInfoControllerTest\#test_throwaway/ -v --seed 7565
+
+# Running:
+
+UserInfoControllerTest#test_throwaway = 0.07 s = F
+
+
+Failure:
+UserInfoControllerTest#test_throwaway [test/controllers/caregiver_onboarding/user_info_controller_test.rb:21]:
+Expected: 2
+  Actual: 3
+
+
+bin/rails test test/controllers/caregiver_onboarding/user_info_controller_test.rb:20
+
+
+Finished in 0.073849s, 13.5411 runs/s, 13.5411 assertions/s.
+1 runs, 1 assertions, 1 failures, 0 errors, 0 skips
+
