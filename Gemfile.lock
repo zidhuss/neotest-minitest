@@ -30,6 +30,7 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     method_source (1.0.0)
+    mini_portile2 (2.8.6)
     minitest (5.18.0)
     minitest-rails (7.0.0)
       minitest (~> 5.10)
@@ -39,7 +40,8 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    nokogiri (1.14.3-arm64-darwin)
+    nokogiri (1.14.3)
+      mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
     racc (1.6.2)
     rack (2.2.6.4)
@@ -66,6 +68,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
+  arm64-darwin-23
 
 DEPENDENCIES
   minitest

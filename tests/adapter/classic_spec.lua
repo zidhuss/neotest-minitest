@@ -41,6 +41,21 @@ describe("Classic Test", function()
 
   describe("_parse_test_output", function()
     assert:set_parameter("TableFormatLevel", -1)
+
+    describe("single assert_equal failure, output from file", function()
+      local output_file_path = "tests/outputs/assert_equal_failure.txt"
+      local f = assert(io.open(output_file_path, "r"))
+      local output = f:read("*all")
+      f.close()
+      it("parses the results correctly", function()
+        local results = plugin._parse_test_output(output, { ["UserInfoControllerTest#test_throwaway"] = "testing" })
+
+        assert.are.same({
+          ["testing"] = { status = "failed", errors = { { message = "Expected: 2\n  Actual: 3", line = 20 } } },
+        }, results)
+      end)
+    end)
+
     describe("single failing test", function()
       local output = [[
 ClassicTest#test_addition = 0.00 s = F
@@ -58,7 +73,7 @@ Expected: 3
         local results = plugin._parse_test_output(output, { ["ClassicTest#test_addition"] = "testing" })
 
         assert.are.same({
-          ["testing"] = { status = "failed", errors = { { message = "Expected: 3\n  Actual: 2", line = 7 } } },
+          ["testing"] = { status = "failed", errors = { { message = "Expected: 3\n  Actual: 2", line = 6 } } },
         }, results)
       end)
     end)
@@ -185,7 +200,7 @@ ClassicTest#test_addition = 0.00 s = .
         assert.are.same({
           ["testing_subtraction"] = {
             status = "failed",
-            errors = { { message = "Expected: 1\n  Actual: 0", line = 10 } },
+            errors = { { message = "Expected: 1\n  Actual: 0", line = 9 } },
           },
           ["testing_addition"] = { status = "passed" },
         }, results)
@@ -227,11 +242,11 @@ rails test Users/abry/src/nvim-neotest/neotest-minitest/tests/minitest_examples/
       assert.are.same({
         ["testing_addition"] = {
           status = "failed",
-          errors = { { message = "Expected: 5\n  Actual: 2", line = 7 } },
+          errors = { { message = "Expected: 5\n  Actual: 2", line = 6 } },
         },
         ["testing_subtraction"] = {
           status = "failed",
-          errors = { { message = "Expected: 1\n  Actual: 0", line = 10 } },
+          errors = { { message = "Expected: 1\n  Actual: 0", line = 9 } },
         },
       }, results)
     end)
