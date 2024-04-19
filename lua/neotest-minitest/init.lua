@@ -46,17 +46,23 @@ function NeotestAdapter.discover_positions(file_path)
       (superclass (scope_resolution) @superclass (#match? @superclass "^Minitest::Test"))
     )) @namespace.definition
 
+    ; System tests that inherit from ApplicationSystemTestCase
+    ((
+        class 
+        name: (constant) @namespace.name (superclass) @superclass (#match? @superclass "(ApplicationSystemTestCase)$" )
+    )) @namespace.definition
+
     ; Methods that begin with test_
     ((
       method
       name: (identifier) @test.name (#match? @test.name "^test_")
     )) @test.definition
 
-    ; rails unit test classes
+    ; rails unit classes
     ((
         class
         name: (constant) @namespace.name
-        (superclass (scope_resolution) @superclass (#match? @superclass "(::IntegrationTest|::TestCase)$"))
+        (superclass (scope_resolution) @superclass (#match? @superclass "(::IntegrationTest|::TestCase|::SystemTestCase)$"))
     )) @namespace.definition
 
     ((
@@ -64,7 +70,6 @@ function NeotestAdapter.discover_positions(file_path)
       method: (identifier) @func_name (#match? @func_name "^(test)$")
       arguments: (argument_list (string (string_content) @test.name))
     )) @test.definition
-
   ]]
 
   return lib.treesitter.parse_positions(file_path, query, {
