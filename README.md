@@ -22,7 +22,7 @@ Install with the package manager of your choice:
       adapters = {
         require("neotest-minitest")
       },
-    }
+    })
   end
 }
 ```
