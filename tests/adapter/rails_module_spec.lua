@@ -2,6 +2,7 @@ local plugin = require("neotest-minitest")
 local async = require("nio.tests")
 
 describe("Rails Module Test", function()
+  assert:set_parameter("TableFormatLevel", -1)
   describe("discover_positions", function()
     async.it("should discover the position for the tests", function()
       local test_path = vim.loop.cwd() .. "/tests/minitest_examples/rails_module_test.rb"
@@ -101,7 +102,7 @@ Expected: 2
         local results = plugin._parse_test_output(output, { ["UserInfoControllerTest#test_throwaway"] = "testing" })
 
         assert.are.same({
-          ["testing"] = { status = "failed", errors = { { message = "Expected: 2\n  Actual: 4", line = 21 } } },
+          ["testing"] = { status = "failed", errors = { { message = "Expected: 2\n  Actual: 4", line = 20 } } },
         }, results)
       end)
     end)
