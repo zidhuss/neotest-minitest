@@ -61,7 +61,10 @@ function NeotestAdapter.discover_positions(file_path)
     ; rails unit classes
     ((
         class
-        name: (constant) @namespace.name
+        name: [
+          (constant) @namespace.name
+          (scope_resolution scope: (constant) name: (constant) @namespace.name)
+        ]
         (superclass (scope_resolution) @superclass (#match? @superclass "(::IntegrationTest|::TestCase|::SystemTestCase)$"))
     )) @namespace.definition
 
@@ -129,8 +132,8 @@ end
 
 function NeotestAdapter._parse_test_output(output, name_mappings)
   local results = {}
-  local test_pattern = "([a-zA-Z0-9:]+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
-  local failure_pattern = "Failure:%s*([%w#_]+)%s*%[([^%]]+)%]:%s*Expected:%s*(.-)%s*Actual:%s*(.-)%s"
+  local test_pattern = "(%w+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
+  local failure_pattern = "Failure:%s*([%w#_:]+)%s*%[([^%]]+)%]:%s*Expected:%s*(.-)%s*Actual:%s*(.-)%s"
   local error_pattern = "Error:%s*([%w:#_]+):%s*(.-)\n[%w%W]-%.rb:(%d+):"
   local traceback_pattern = "(%d+:[^:]+:%d+:in `[^']+')%s+([^:]+):(%d+):(in `[^']+':[^\n]+)"
 
@@ -156,8 +159,9 @@ function NeotestAdapter._parse_test_output(output, name_mappings)
       status = status == "." and "passed" or "failed",
     } end
   end
-
   for test_name, filepath, expected, actual in string.gmatch(output, failure_pattern) do
+    test_name = utils.replace_module_namespace(test_name)
+
     local line = tonumber(string.match(filepath, ":(%d+)$"))
     local message = string.format("Expected: %s\n  Actual: %s", expected, actual)
     local pos_id = name_mappings[test_name]
@@ -174,6 +178,7 @@ function NeotestAdapter._parse_test_output(output, name_mappings)
   end
 
   for test_name, message, line_str in string.gmatch(output, error_pattern) do
+    test_name = utils.replace_module_namespace(test_name)
     local line = tonumber(line_str)
     local pos_id = name_mappings[test_name]
     if results[pos_id] then
