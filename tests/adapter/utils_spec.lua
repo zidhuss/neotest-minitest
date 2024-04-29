@@ -76,7 +76,10 @@ describe("escaped_full_test_name", function()
     }, function(pos)
       return pos.id
     end)
-    assert.equals("namespace\\#test_\\#escaped_full_test_name_should_be_escaped", utils.escaped_full_test_name(tree:children()[1]))
+    assert.equals(
+      "namespace\\#test_\\#escaped_full_test_name_should_be_escaped",
+      utils.escaped_full_test_name(tree:children()[1])
+    )
   end)
 
   it("escapes ? characters", function()
@@ -132,5 +135,13 @@ describe("strip_ansi", function()
     local input = "This is \27[32mgreen\27[0m text!"
 
     assert.equals("This is green text!", utils.strip_ansi_escape_codes(input))
+  end)
+end)
+
+describe("replace_module_namespace", function()
+  it("removes module namespace", function()
+    local input = "Foo::Bar"
+
+    assert.equals("Bar", utils.replace_module_namespace(input))
   end)
 end)
