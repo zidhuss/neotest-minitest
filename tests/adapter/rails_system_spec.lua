@@ -72,4 +72,39 @@ describe("Rails System Test", function()
       assert.are.same(positions, expected_positions)
     end)
   end)
+
+  describe("discover_positions namespaced ApplicationSystemTestCase", function()
+    async.it("should discover the position for the tests", function()
+      local test_path = vim.loop.cwd() .. "/tests/minitest_examples/namespaced_rails_system_test.rb"
+      local positions = plugin.discover_positions(test_path):to_list()
+      local expected_positions = {
+        {
+          id = test_path,
+          name = "namespaced_rails_system_test.rb",
+          path = test_path,
+          range = { 0, 0, 6, 0 },
+          type = "file",
+        },
+        {
+          {
+            id = "./tests/minitest_examples/namespaced_rails_system_test.rb::3",
+            name = "EmailsTest",
+            path = test_path,
+            range = { 2, 0, 5, 3 },
+            type = "namespace",
+          },
+          {
+            {
+              id = "./tests/minitest_examples/namespaced_rails_system_test.rb::4",
+              name = "should pass",
+              path = test_path,
+              range = { 3, 2, 4, 5 },
+              type = "test",
+            },
+          },
+        },
+      }
+      assert.are.same(positions, expected_positions)
+    end)
+  end)
 end)

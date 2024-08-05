@@ -49,7 +49,11 @@ function NeotestAdapter.discover_positions(file_path)
     ; System tests that inherit from ApplicationSystemTestCase
     ((
         class 
-        name: (constant) @namespace.name (superclass) @superclass (#match? @superclass "(ApplicationSystemTestCase)$" )
+        name: [
+          (constant) @namespace.name 
+          (scope_resolution scope: (constant) name: (constant) @namespace.name)
+        ]
+        (superclass) @superclass (#match? @superclass "(ApplicationSystemTestCase)$" )
     )) @namespace.definition
 
     ; Methods that begin with test_
