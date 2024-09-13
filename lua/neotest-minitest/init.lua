@@ -20,7 +20,7 @@ NeotestAdapter.root = lib.files.match_root_pattern("Gemfile", ".gitignore")
 ---@param file_path string
 ---@return boolean
 function NeotestAdapter.is_test_file(file_path)
-  return vim.endswith(file_path, "_test.rb")
+  return vim.endswith(file_path, "_test.rb") or string.match(file_path, "/test_.+%.rb$") ~= nil
 end
 
 ---Filter directories when searching for test files
