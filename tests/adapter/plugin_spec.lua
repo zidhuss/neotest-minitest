@@ -1,8 +1,12 @@
 local plugin = require("neotest-minitest")
 
 describe("is_test_file", function()
-  it("matches test files", function()
+  it("matches Rails-style test file", function()
     assert.equals(true, plugin.is_test_file("./test/foo_test.rb"))
+  end)
+
+  it("matches minitest-style test file", function()
+    assert.equals(true, plugin.is_test_file("./test/test_foo.rb"))
   end)
 
   it("does not match plain ruby files", function()
