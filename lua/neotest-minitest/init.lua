@@ -30,7 +30,18 @@ end
 ---@param root string Root directory of project
 ---@return boolean
 function NeotestAdapter.filter_dir(name, rel_path, root)
-  return name ~= "vendor"
+  local ignore_rel_paths = { "vendor/", "log/", "public/", "storage/", "tmp/" }
+  if name == "node_modules" then
+    return false
+  end
+
+  for _, ignore in ipairs(ignore_rel_paths) do
+    if vim.startswith(rel_path, ignore) then
+      return false
+    end
+  end
+
+  return true
 end
 
 ---Given a file path, parse all the tests within it.
