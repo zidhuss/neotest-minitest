@@ -2,6 +2,46 @@ local plugin = require("neotest-minitest")
 local async = require("nio.tests")
 
 describe("Classic Test", function()
+  describe("build_spec", function()
+    async.it("should build a spec", function()
+      local test_path = vim.loop.cwd() .. "/tests/minitest_examples/classic_test.rb"
+      local tree = plugin.discover_positions(test_path)
+
+      local spec = plugin.build_spec({
+        tree = tree,
+        strategy = "dap",
+      })
+
+      local expected_strategy = {
+        args = {
+          "-O",
+          "--port",
+          62164,
+          "-c",
+          "-e",
+          "cont",
+          "--",
+          "bundle",
+          "exec",
+          "ruby",
+          "-Itest",
+          vim.loop.cwd() .. "/tests/minitest_examples/classic_test.rb",
+          "-v",
+        },
+        bundle = "bundle",
+        command = "rdbg",
+        cwd = "${workspaceFolder}",
+        localfs = true,
+        name = "Neotest Debugger",
+        port = 62164,
+        request = "attach",
+        type = "ruby",
+      }
+
+      assert.are.same(spec.strategy, expected_strategy)
+    end)
+  end)
+
   describe("discovers_positions", function()
     async.it("should discover the position of the test", function()
       local test_path = vim.loop.cwd() .. "/tests/minitest_examples/classic_test.rb"
