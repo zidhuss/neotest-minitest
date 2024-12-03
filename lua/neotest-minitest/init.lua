@@ -91,17 +91,18 @@ end
 function NeotestAdapter.build_spec(args)
   local script_args = {}
   local position = args.tree:data()
-  local results_path = async.fn.tempname()
+  local results_path = config.results_path()
+  local spec_path = config.transform_spec_path(position.path)
 
   local name_mappings = utils.get_mappings(args.tree)
 
   local function run_by_filename()
-    table.insert(script_args, position.path)
+    table.insert(script_args, spec_path)
   end
 
   local function run_by_name()
     local full_name = utils.escaped_full_test_name(args.tree, position.name)
-    table.insert(script_args, position.path)
+    table.insert(script_args, spec_path)
     table.insert(script_args, "--name")
     -- https://chriskottom.com/articles/command-line-flags-for-minitest-in-the-raw/
     table.insert(script_args, "/^" .. full_name .. "$/")
@@ -290,6 +291,20 @@ setmetatable(NeotestAdapter, {
     elseif opts.test_cmd then
       config.get_test_cmd = function()
         return opts.test_cmd
+      end
+    end
+    if is_callable(opts.transform_spec_path) then
+      config.transform_spec_path = opts.transform_spec_path
+    elseif opts.transform_spec_path then
+      config.transform_spec_path = function()
+        return opts.transform_spec_path
+      end
+    end
+    if is_callable(opts.results_path) then
+      config.results_path = opts.results_path
+    elseif opts.results_path then
+      config.results_path = function()
+        return opts.results_path
       end
     end
     return NeotestAdapter
