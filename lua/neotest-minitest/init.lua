@@ -130,6 +130,37 @@ function NeotestAdapter.build_spec(args)
     table.insert(script_args, "--")
   end
 
+  local function dap_strategy(command)
+    local port = math.random(49152, 65535)
+    port = config.port or port
+
+    local rdbg_args = {
+      "-O",
+      "--port",
+      port,
+      "-c",
+      "-e",
+      "cont",
+      "--",
+    }
+
+    for i = 1, #command do
+      rdbg_args[#rdbg_args + 1] = command[i]
+    end
+
+    return {
+      name = "Neotest Debugger",
+      type = "ruby",
+      bundle = "bundle",
+      localfs = true,
+      request = "attach",
+      args = rdbg_args,
+      command = "rdbg",
+      cwd = "${workspaceFolder}",
+      port = port,
+    }
+  end
+
   if position.type == "file" then run_by_filename() end
 
   if position.type == "test" or position.type == "namespace" then run_by_name() end
@@ -142,15 +173,27 @@ function NeotestAdapter.build_spec(args)
     "-v",
   })
 
-  return {
-    cwd = nil,
-    command = command,
-    context = {
-      results_path = results_path,
-      pos_id = position.id,
-      name_mappings = name_mappings,
-    },
-  }
+  if args.strategy == "dap" then
+    return {
+      command = command,
+      context = {
+        results_path = results_path,
+        pos_id = position.id,
+        name_mappings = name_mappings,
+      },
+      strategy = dap_strategy(command),
+    }
+  else
+    return {
+      cwd = nil,
+      command = command,
+      context = {
+        results_path = results_path,
+        pos_id = position.id,
+        name_mappings = name_mappings,
+      },
+    }
+  end
 end
 
 function NeotestAdapter._parse_test_output(output, name_mappings)
