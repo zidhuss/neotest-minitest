@@ -40,6 +40,41 @@ M.generate_treesitter_id = function(position)
   return id
 end
 
+M.full_spec_name = function(tree)
+  local name = tree:data().name
+  local namespaces = {}
+  local num_namespaces = 0
+
+  for parent_node in tree:iter_parents() do
+    local data = parent_node:data()
+    if data.type == "namespace" then
+      table.insert(namespaces, 1, parent_node:data().name)
+      num_namespaces = num_namespaces + 1
+    else
+      break
+    end
+  end
+
+  if num_namespaces == 0 then return name end
+
+  local result = ""
+  -- Assemble namespaces
+  result = table.concat(namespaces, "::")
+  -- Add # separator.
+  result = result .. "#"
+  -- Add test_ prefix.
+  result = result .. "test_"
+  -- Add index.
+  for i, child_tree in ipairs(tree:parent():children()) do
+    for _, node in child_tree:iter_nodes() do
+      if node:data().id == tree:data().id then result = result .. string.format("%04d", i) end
+    end
+  end
+  -- Add _[name].
+  result = result .. "_" .. name
+  return result
+end
+
 M.full_test_name = function(tree)
   local name = tree:data().name
   local parent_tree = tree:parent()
@@ -50,6 +85,11 @@ M.full_test_name = function(tree)
   if not name:match("^test_") then name = "test_" .. name end
 
   return parent_name .. "#" .. name:gsub(" ", "_")
+end
+
+M.escaped_full_spec_name = function(tree)
+  local full_name = M.full_spec_name(tree)
+  return full_name:gsub("([?#])", "\\%1")
 end
 
 M.escaped_full_test_name = function(tree)

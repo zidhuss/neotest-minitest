@@ -39,6 +39,13 @@ end
 ---@return neotest.Tree | nil
 function NeotestAdapter.discover_positions(file_path)
   local query = [[
+    ; Classes that inherit from Minitest::Spec
+    ((
+      class
+      name: (constant) @namespace.name
+      (superclass (scope_resolution) @superclass (#match? @superclass "^Minitest::Spec"))
+    )) @namespace.definition
+
     ; Classes that inherit from Minitest::Test
     ((
       class
@@ -74,6 +81,12 @@ function NeotestAdapter.discover_positions(file_path)
 
     ((
       call
+      method: (identifier) @func_name (#match? @func_name "^(describe|context)$")
+      arguments: (argument_list (_) @namespace.name)
+    )) @namespace.definition
+
+    ((
+      call
       method: (identifier) @func_name (#match? @func_name "^(test)$")
       arguments: (argument_list (string (string_content) @test.name))
     )) @test.definition
@@ -101,11 +114,12 @@ function NeotestAdapter.build_spec(args)
   end
 
   local function run_by_name()
-    local full_name = utils.escaped_full_test_name(args.tree, position.name)
+    local full_spec_name = utils.escaped_full_spec_name(args.tree)
+    local full_test_name = utils.escaped_full_test_name(args.tree)
     table.insert(script_args, spec_path)
     table.insert(script_args, "--name")
-    -- https://chriskottom.com/articles/command-line-flags-for-minitest-in-the-raw/
-    table.insert(script_args, "/^" .. full_name .. "$/")
+    -- https://chriskottom.com/articles/command-line-flags-for-minitest-in-the-rawt st/
+    table.insert(script_args, "/^" .. full_spec_name .. "|" .. full_test_name .. "$/")
   end
 
   local function run_dir()
@@ -123,7 +137,7 @@ function NeotestAdapter.build_spec(args)
     for _, node in tree:iter_nodes() do
       if node:data().type == "file" then
         local path = node:data().path
-	table.insert(script_args, path)
+        table.insert(script_args, path)
       end
     end
 
