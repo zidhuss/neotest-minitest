@@ -39,13 +39,6 @@ end
 ---@return neotest.Tree | nil
 function NeotestAdapter.discover_positions(file_path)
   local query = [[
-    ; Classes that inherit from Minitest::Spec
-    ((
-      class
-      name: (constant) @namespace.name
-      (superclass (scope_resolution) @superclass (#match? @superclass "^Minitest::Spec"))
-    )) @namespace.definition
-
     ; Classes that inherit from Minitest::Test
     ((
       class
@@ -79,16 +72,37 @@ function NeotestAdapter.discover_positions(file_path)
         (superclass (scope_resolution) @superclass (#match? @superclass "(::IntegrationTest|::TestCase|::SystemTestCase)$"))
     )) @namespace.definition
 
-    ((
-      call
+    ((call
       method: (identifier) @func_name (#match? @func_name "^(describe|context)$")
       arguments: (argument_list (_) @namespace.name)
+    )) @namespace.definition
+
+    ((call
+      method: (identifier) @namespace.name (#match? @namespace.name "^(describe|context)$")
+      .
+      block: (_)
     )) @namespace.definition
 
     ((
       call
       method: (identifier) @func_name (#match? @func_name "^(test)$")
       arguments: (argument_list (string (string_content) @test.name))
+    )) @test.definition
+
+    ((call
+      method: (identifier) @func_name (#match? @func_name "^(it)$")
+      block: (block (_) @test.name)
+    )) @test.definition
+
+    ((call
+      method: (identifier) @func_name (#match? @func_name "^(it)$")
+      block: (do_block (_) @test.name)
+      !arguments
+    )) @test.definition
+
+    ((call
+      method: (identifier) @func_name (#match? @func_name "^(it)$")
+      arguments: (argument_list (_) @test.name)
     )) @test.definition
   ]]
 
@@ -211,9 +225,40 @@ function NeotestAdapter.build_spec(args)
   end
 end
 
+local iter_test_output_name_status = function(output)
+  local pattern = "%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
+
+  -- keep track of last test result position
+  local last_pos = 0
+
+  return function()
+    -- find test result
+    local r_start, r_end = string.find(output, pattern, last_pos)
+    if r_start == nil or r_end == nil then return nil, nil end
+
+    -- extract status from test results
+    local test_status = string.match(output, pattern, r_start)
+
+    -- find test name
+    --
+    -- iterate backwards through output until we find a newline or start of output.
+    local n_start = 0
+    for i = r_start, 0, -1 do
+      if string.sub(output, i, i) == "\n" then
+        n_start = i + 1
+        break
+      end
+    end
+    local test_name = string.sub(output, n_start, r_start - 1)
+
+    -- keep track of last test result position
+    last_pos = r_end
+
+    return test_name, test_status
+  end
+end
 function NeotestAdapter._parse_test_output(output, name_mappings)
   local results = {}
-  local test_pattern = "(%w+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
   local failure_pattern = "Failure:%s*([%w#_:]+)%s*%[([^%]]+)%]:%s*Expected:%s*(.-)%s*Actual:%s*(.-)%s"
   local error_pattern = "Error:%s*([%w:#_]+):%s*(.-)\n[%w%W]-%.rb:(%d+):"
   local traceback_pattern = "(%d+:[^:]+:%d+:in `[^']+')%s+([^:]+):(%d+):(in `[^']+':[^\n]+)"
@@ -233,13 +278,22 @@ function NeotestAdapter._parse_test_output(output, name_mappings)
     end
   end
 
-  for test_name, status in string.gmatch(output, test_pattern) do
+  for test_name, status in iter_test_output_name_status(output) do
     local pos_id = name_mappings[test_name]
+    if not pos_id then
+      -- try chopping of [module]:: parts
+      --
+      -- TODO: replace this with a Treesitter query that captures the modules
+      -- as a @namespace.definition instead.
+      local test_name_without_modules = utils.replace_module_namespace(test_name)
+      if name_mappings[test_name_without_modules] then pos_id = name_mappings[test_name_without_modules] end
+    end
 
     if pos_id then results[pos_id] = {
       status = status == "." and "passed" or "failed",
     } end
   end
+
   for test_name, filepath, expected, actual in string.gmatch(output, failure_pattern) do
     test_name = utils.replace_module_namespace(test_name)
 

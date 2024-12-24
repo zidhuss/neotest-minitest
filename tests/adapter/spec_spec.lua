@@ -12,49 +12,49 @@ describe("Spec Test", function()
           id = test_path,
           name = "spec_test.rb",
           path = test_path,
-          range = { 0, 0, 17, 0 },
+          range = { 0, 0, 18, 0 },
           type = "file",
         },
         {
           {
-            id = "./tests/minitest_examples/spec_test.rb::5",
-            name = "SpecTest",
+            id = "./tests/minitest_examples/spec_test.rb::6",
+            name = "'SpecTest'",
             path = test_path,
-            range = { 4, 0, 16, 3 },
+            range = { 5, 0, 17, 3 },
             type = "namespace",
           },
           {
             {
-              id = "./tests/minitest_examples/spec_test.rb::6",
-              name = "'#add'",
+              id = "./tests/minitest_examples/spec_test.rb::7",
+              name = "'addition'",
               path = test_path,
-              range = { 5, 2, 9, 5 },
+              range = { 6, 2, 10, 5 },
               type = "namespace",
             },
             {
               {
-                id = "./tests/minitest_examples/spec_test.rb::7",
-                name = "adds two numbers",
+                id = "./tests/minitest_examples/spec_test.rb::8",
+                name = "'adds two numbers'",
                 path = test_path,
-                range = { 6, 4, 8, 7 },
+                range = { 7, 4, 9, 7 },
                 type = "test",
               },
             },
           },
           {
             {
-              id = "./tests/minitest_examples/spec_test.rb::12",
-              name = "'#subtract'",
+              id = "./tests/minitest_examples/spec_test.rb::13",
+              name = "'subtraction'",
               path = test_path,
-              range = { 11, 2, 15, 5 },
+              range = { 12, 2, 16, 5 },
               type = "namespace",
             },
             {
               {
-                id = "./tests/minitest_examples/spec_test.rb::13",
-                name = "subtracts two numbers",
+                id = "./tests/minitest_examples/spec_test.rb::14",
+                name = "'subtracts two numbers'",
                 path = test_path,
-                range = { 12, 4, 14, 7 },
+                range = { 13, 4, 15, 7 },
                 type = "test",
               },
             },
@@ -69,18 +69,18 @@ describe("Spec Test", function()
   describe("_parse_test_output", function()
     describe("single failing test", function()
       local output = [[
-SpecTest#test_adds_two_numbers = 0.00 s = F
-
+SpecTest::addition#test_0001_adds two numbers = 0.00 s = F
 
 Failure:
-SpecTest#test_adds_two_numbers [/src/nvim-neotest/neotest-minitest/tests/minitest_examples/spec_test.rb:8]:
+SpecTest::addition#test_0001_adds two numbers [tests/minitest_examples/spec_test.rb:9]:
 Expected: 4
   Actual: 5
 
 
     ]]
       it("parses the results correctly", function()
-        local results = plugin._parse_test_output(output, { ["SpecTest#test_adds_two_numbers"] = "testing" })
+        local results =
+          plugin._parse_test_output(output, { ["SpecTest::addition#test_0001_adds two numbers"] = "testing" })
 
         assert.are.same(
           { ["testing"] = { status = "failed", errors = { { message = "Expected: 4\n  Actual: 5", line = 7 } } } },
