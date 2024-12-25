@@ -42,7 +42,7 @@ end
 
 ---@param s string
 local function unquote(s)
-  local r, _ = s:gsub("^[']*([^']*)[']*$", "%1")
+  local r, _ = s:gsub("^['\"]*([^'\"]*)['\"]*$", "%1")
   return r
 end
 
@@ -93,11 +93,6 @@ M.full_test_name = function(tree)
   if not name:match("^test_") then name = "test_" .. name end
 
   return parent_name .. "#" .. name:gsub(" ", "_")
-end
-
-M.escaped_full_spec_name = function(tree)
-  local full_name = M.full_spec_name(tree)
-  return full_name:gsub("([?#])", "\\%1")
 end
 
 M.escaped_full_test_name = function(tree)
