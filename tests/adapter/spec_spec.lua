@@ -83,7 +83,7 @@ Expected: 4
           plugin._parse_test_output(output, { ["SpecTest::addition#test_0001_adds two numbers"] = "testing" })
 
         assert.are.same(
-          { ["testing"] = { status = "failed", errors = { { message = "Expected: 4\n  Actual: 5", line = 7 } } } },
+          { ["testing"] = { status = "failed", errors = { { message = "Expected: 4\n  Actual: 5", line = 8 } } } },
           results
         )
       end)
@@ -142,11 +142,12 @@ tests/minitest_examples/rails_unit_erroring_test.rb:1:in `require': cannot load 
 
     describe("single passing test", function()
       local output = [[
-SpecTest#test_subtracts_two_numbers = 0.00 s = .
+SpecTest::subtraction#test_0001_subtracts two numbers = 0.00 s = .
 ]]
 
       it("parses the results correctly", function()
-        local results = plugin._parse_test_output(output, { ["SpecTest#test_subtracts_two_numbers"] = "testing" })
+        local results =
+          plugin._parse_test_output(output, { ["SpecTest::subtraction#test_0001_subtracts two numbers"] = "testing" })
 
         assert.are.same({ ["testing"] = { status = "passed" } }, results)
       end)
