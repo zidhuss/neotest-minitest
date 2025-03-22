@@ -18,7 +18,7 @@ describe("Spec Test", function()
         {
           {
             id = "./tests/minitest_examples/spec_test.rb::6",
-            name = "'SpecTest'",
+            name = "SpecTest",
             path = test_path,
             range = { 5, 0, 17, 3 },
             type = "namespace",
@@ -26,7 +26,7 @@ describe("Spec Test", function()
           {
             {
               id = "./tests/minitest_examples/spec_test.rb::7",
-              name = "'addition'",
+              name = "addition",
               path = test_path,
               range = { 6, 2, 10, 5 },
               type = "namespace",
@@ -34,7 +34,7 @@ describe("Spec Test", function()
             {
               {
                 id = "./tests/minitest_examples/spec_test.rb::8",
-                name = "'adds two numbers'",
+                name = "adds two numbers",
                 path = test_path,
                 range = { 7, 4, 9, 7 },
                 type = "test",
@@ -44,7 +44,7 @@ describe("Spec Test", function()
           {
             {
               id = "./tests/minitest_examples/spec_test.rb::13",
-              name = "'subtraction'",
+              name = "subtraction",
               path = test_path,
               range = { 12, 2, 16, 5 },
               type = "namespace",
@@ -52,7 +52,7 @@ describe("Spec Test", function()
             {
               {
                 id = "./tests/minitest_examples/spec_test.rb::14",
-                name = "'subtracts two numbers'",
+                name = "subtracts two numbers",
                 path = test_path,
                 range = { 13, 4, 15, 7 },
                 type = "test",

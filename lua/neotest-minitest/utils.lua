@@ -40,21 +40,15 @@ M.generate_treesitter_id = function(position, parents)
   return id
 end
 
----@param s string
-local function unquote(s)
-  local r, _ = s:gsub("^['\"]*([^'\"]*)['\"]*$", "%1")
-  return r
-end
-
 M.full_spec_name = function(tree)
-  local name = unquote(tree:data().name)
+  local name = tree:data().name
   local namespaces = {}
   local num_namespaces = 0
 
   for parent_node in tree:iter_parents() do
     local data = parent_node:data()
     if data.type == "namespace" then
-      table.insert(namespaces, 1, unquote(parent_node:data().name))
+      table.insert(namespaces, 1, parent_node:data().name)
       num_namespaces = num_namespaces + 1
     else
       break

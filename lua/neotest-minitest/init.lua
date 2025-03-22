@@ -72,12 +72,14 @@ function NeotestAdapter.discover_positions(file_path)
         (superclass (scope_resolution) @superclass (#match? @superclass "(::IntegrationTest|::TestCase|::SystemTestCase)$"))
     )) @namespace.definition
 
-    ((call
+    ((
+      call
       method: (identifier) @func_name (#match? @func_name "^(describe|context)$")
-      arguments: (argument_list (_) @namespace.name)
+      arguments: (argument_list (string (string_content) @namespace.name))
     )) @namespace.definition
 
-    ((call
+    ((
+      call
       method: (identifier) @namespace.name (#match? @namespace.name "^(describe|context)$")
       .
       block: (_)
@@ -89,20 +91,10 @@ function NeotestAdapter.discover_positions(file_path)
       arguments: (argument_list (string (string_content) @test.name))
     )) @test.definition
 
-    ((call
+    ((
+      call
       method: (identifier) @func_name (#match? @func_name "^(it)$")
-      block: (block (_) @test.name)
-    )) @test.definition
-
-    ((call
-      method: (identifier) @func_name (#match? @func_name "^(it)$")
-      block: (do_block (_) @test.name)
-      !arguments
-    )) @test.definition
-
-    ((call
-      method: (identifier) @func_name (#match? @func_name "^(it)$")
-      arguments: (argument_list (_) @test.name)
+      arguments: (argument_list (string (string_content) @test.name))
     )) @test.definition
   ]]
 
@@ -132,7 +124,7 @@ function NeotestAdapter.build_spec(args)
     local full_test_name = utils.escaped_full_test_name(args.tree)
     table.insert(script_args, spec_path)
     table.insert(script_args, "--name")
-    -- https://chriskottom.com/articles/command-line-flags-for-minitest-in-the-rawt st/
+    -- https://chriskottom.com/articles/command-line-flags-for-minitest-in-the-raw/
     table.insert(script_args, "/^" .. full_spec_name .. "|" .. full_test_name .. "$/")
   end
 
