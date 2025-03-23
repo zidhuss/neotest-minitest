@@ -41,9 +41,16 @@ M.generate_treesitter_id = function(position, parents)
 end
 
 M.full_spec_name = function(tree)
-  local name = tree:data().name
+  local name = ""
   local namespaces = {}
   local num_namespaces = 0
+
+  if tree:data().type == "namespace" then
+    table.insert(namespaces, 1, tree:data().name)
+    num_namespaces = num_namespaces + 1
+  else
+    name = tree:data().name
+  end
 
   for parent_node in tree:iter_parents() do
     local data = parent_node:data()
@@ -59,8 +66,12 @@ M.full_spec_name = function(tree)
 
   -- build result
   local result = ""
+
   -- assemble namespaces
   result = table.concat(namespaces, "::")
+
+  if name == "" then return result end
+
   -- add # separator
   result = result .. "#"
   -- add test_ prefix
