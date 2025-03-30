@@ -35,6 +35,8 @@ describe("full_spec_name", function()
     }, function(pos)
       return pos.id
     end)
+
+    assert.equals("namespace1::namespace2::namespace3", utils.full_spec_name(tree:children()[1]:children()[1]))
     assert.equals(
       "namespace1::namespace2::namespace3#test_0001_example",
       utils.full_spec_name(tree:children()[1]:children()[1]:children()[1])

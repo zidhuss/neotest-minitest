@@ -4,7 +4,7 @@ local async = require("nio.tests")
 describe("Spec Test", function()
   assert:set_parameter("TableFormatLevel", -1)
   describe("discover_positions", function()
-    async.it("should discover the position fo the tests", function()
+    async.it("should discover the position for the tests", function()
       local test_path = vim.loop.cwd() .. "/tests/minitest_examples/spec_test.rb"
       local positions = plugin.discover_positions(test_path):to_list()
       local expected_positions = {
