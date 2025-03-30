@@ -64,6 +64,67 @@ describe("Spec Test", function()
 
       assert.are.same(positions, expected_positions)
     end)
+
+    async.it("should discover the position for the tests, minispec-test-rails variant", function()
+      local test_path = vim.loop.cwd() .. "/tests/minitest_examples/rails_spec_test.rb"
+      local positions = plugin.discover_positions(test_path):to_list()
+      local expected_positions = {
+        {
+          id = test_path,
+          name = "rails_spec_test.rb",
+          path = test_path,
+          range = { 0, 0, 18, 0 },
+          type = "file",
+        },
+        {
+          {
+            id = "./tests/minitest_examples/rails_spec_test.rb::6",
+            name = "RailsSpecTest",
+            path = test_path,
+            range = { 5, 0, 17, 3 },
+            type = "namespace",
+          },
+          {
+            {
+              id = "./tests/minitest_examples/rails_spec_test.rb::7",
+              name = "addition",
+              path = test_path,
+              range = { 6, 2, 10, 5 },
+              type = "namespace",
+            },
+            {
+              {
+                id = "./tests/minitest_examples/rails_spec_test.rb::8",
+                name = "adds two numbers",
+                path = test_path,
+                range = { 7, 4, 9, 7 },
+                type = "test",
+              },
+            },
+          },
+          {
+            {
+              id = "./tests/minitest_examples/rails_spec_test.rb::13",
+              name = "subtraction",
+              path = test_path,
+              range = { 12, 2, 16, 5 },
+              type = "namespace",
+            },
+            {
+              {
+                id = "./tests/minitest_examples/rails_spec_test.rb::14",
+                name = "subtracts two numbers",
+                path = test_path,
+                range = { 13, 4, 15, 7 },
+                type = "test",
+              },
+            },
+          },
+        },
+      }
+
+      assert.are.same(positions, expected_positions)
+    end)
   end)
 
   describe("_parse_test_output", function()
