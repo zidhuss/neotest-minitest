@@ -92,6 +92,42 @@ require("neotest-minitest")({
 })
 ```
 
+### Running tests in a Docker container
+
+The following configuration overrides `test_cmd` to run a Docker container (using `docker-compose`) and overrides `transform_spec_path` to pass the spec file as a relative path instead of an absolute path to Minitest. The `results_path` needs to be set to a location which is available to both the container and the host.
+
+```lua
+require("neotest").setup({
+  adapters = {
+    require("neotest-minitest")({
+      test_cmd = function()
+        return vim.tbl_flatten({
+          "docker",
+          "compose",
+          "exec",
+          "-i",
+          "-w", "/app",
+          "-e", "RAILS_ENV=test",
+          "app",
+          "bundle",
+          "exec",
+          "test"
+        })
+      end,
+
+      transform_spec_path = function(path)
+        local prefix = require('neotest-minitest').root(path)
+        return string.sub(path, string.len(prefix) + 2, -1)
+      end,
+
+      results_path = "tmp/minitest.output"
+    })
+  }
+})
+```
+
+Alternatively, you can accomplish this using a shell script as your Minitest command. See [this comment](https://github.com/nvim-neotest/neotest/issues/89#issuecomment-1338141432) for an example.
+
 ## :rocket: Usage
 
 _NOTE_: All usages of `require('neotest').run.run` can be mapped to a command in your config (this is not included and should be done by yourself).
