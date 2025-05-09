@@ -157,9 +157,7 @@ function NeotestAdapter.build_spec(args)
         pos_id = position.id,
         name_mappings = name_mappings,
       },
-      strategy = 
-      
-      (command),
+      strategy = dap_strategy(command),
     }
   else
     return {
