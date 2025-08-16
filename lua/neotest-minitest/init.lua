@@ -74,7 +74,26 @@ function NeotestAdapter.discover_positions(file_path)
 
     ((
       call
+      method: (identifier) @func_name (#match? @func_name "^(describe|context)$")
+      arguments: (argument_list (string (string_content) @namespace.name))
+    )) @namespace.definition
+
+    ((
+      call
+      method: (identifier) @namespace.name (#match? @namespace.name "^(describe|context)$")
+      .
+      block: (_)
+    )) @namespace.definition
+
+    ((
+      call
       method: (identifier) @func_name (#match? @func_name "^(test)$")
+      arguments: (argument_list (string (string_content) @test.name))
+    )) @test.definition
+
+    ((
+      call
+      method: (identifier) @func_name (#match? @func_name "^(it)$")
       arguments: (argument_list (string (string_content) @test.name))
     )) @test.definition
   ]]
@@ -101,11 +120,12 @@ function NeotestAdapter.build_spec(args)
   end
 
   local function run_by_name()
-    local full_name = utils.escaped_full_test_name(args.tree, position.name)
+    local full_spec_name = utils.full_spec_name(args.tree)
+    local full_test_name = utils.escaped_full_test_name(args.tree)
     table.insert(script_args, spec_path)
     table.insert(script_args, "--name")
     -- https://chriskottom.com/articles/command-line-flags-for-minitest-in-the-raw/
-    table.insert(script_args, "/^" .. full_name .. "$/")
+    table.insert(script_args, "/^" .. full_spec_name .. "|" .. full_test_name .. "$/")
   end
 
   local function run_dir()
@@ -123,7 +143,7 @@ function NeotestAdapter.build_spec(args)
     for _, node in tree:iter_nodes() do
       if node:data().type == "file" then
         local path = node:data().path
-	table.insert(script_args, path)
+        table.insert(script_args, path)
       end
     end
 
@@ -197,14 +217,78 @@ function NeotestAdapter.build_spec(args)
   end
 end
 
+local iter_test_output_error = function(output)
+  local header_pattern = "Failure:%s*"
+  local filepath_pattern = "%s+%[([^%]]+)]:%s*"
+  local result_pattern = "Expected:%s*(.-)%s*Actual:%s*(.-)%s"
+
+  -- keep track of last test error position
+  local last_pos = 0
+
+  return function()
+    -- find error header
+    local h_start, h_end = string.find(output, header_pattern, last_pos)
+    if h_start == nil or h_end == nil then return nil, nil, nil, nil end
+
+    -- find file path
+    local f_start, f_end = string.find(output, filepath_pattern, h_end)
+    if f_start == nil or f_end == nil then return nil, nil, nil, nil end
+
+    -- extract file path
+    local filepath = string.match(output, filepath_pattern, f_start)
+
+    -- extract test name
+    local test_name = string.sub(output, h_end + 1, f_start - 1)
+
+    -- find expected and result
+    local expected, actual = string.match(output, result_pattern, f_end)
+
+    -- keep track of last test error position
+    last_pos = f_end
+
+    return test_name, filepath, expected, actual
+  end
+end
+
+local iter_test_output_status = function(output)
+  local pattern = "%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
+
+  -- keep track of last test result position
+  local last_pos = 0
+
+  return function()
+    -- find test result
+    local r_start, r_end = string.find(output, pattern, last_pos)
+    if r_start == nil or r_end == nil then return nil, nil end
+
+    -- extract status from test results
+    local test_status = string.match(output, pattern, r_start)
+
+    -- find test name
+    --
+    -- iterate backwards through output until we find a newline or start of output.
+    local n_start = 0
+    for i = r_start, 0, -1 do
+      if string.sub(output, i, i) == "\n" then
+        n_start = i + 1
+        break
+      end
+    end
+    local test_name = string.sub(output, n_start, r_start - 1)
+
+    -- keep track of last test result position
+    last_pos = r_end
+
+    return test_name, test_status
+  end
+end
+
 function NeotestAdapter._parse_test_output(output, name_mappings)
   local results = {}
-  local test_pattern = "(%w+#[%S]+)%s*=%s*[%d.]+%s*s%s*=%s*([FE.])"
-  local failure_pattern = "Failure:%s*([%w#_:]+)%s*%[([^%]]+)%]:%s*Expected:%s*(.-)%s*Actual:%s*(.-)%s"
   local error_pattern = "Error:%s*([%w:#_]+):%s*(.-)\n[%w%W]-%.rb:(%d+):"
   local traceback_pattern = "(%d+:[^:]+:%d+:in `[^']+')%s+([^:]+):(%d+):(in `[^']+':[^\n]+)"
 
-  for last_traceback, file_name, line_str, message in string.gmatch(output, traceback_pattern) do
+  for _, _, line_str, message in string.gmatch(output, traceback_pattern) do
     local line = tonumber(line_str)
     for _, pos_id in pairs(name_mappings) do
       results[pos_id] = {
@@ -219,20 +303,28 @@ function NeotestAdapter._parse_test_output(output, name_mappings)
     end
   end
 
-  for test_name, status in string.gmatch(output, test_pattern) do
+  for test_name, status in iter_test_output_status(output) do
     local pos_id = name_mappings[test_name]
+    if not pos_id then
+      test_name = utils.replace_module_namespace(test_name)
+      if name_mappings[test_name] then pos_id = name_mappings[test_name] end
+    end
 
     if pos_id then results[pos_id] = {
       status = status == "." and "passed" or "failed",
     } end
   end
-  for test_name, filepath, expected, actual in string.gmatch(output, failure_pattern) do
-    test_name = utils.replace_module_namespace(test_name)
+
+  for test_name, filepath, expected, actual in iter_test_output_error(output) do
+    local message = string.format("Expected: %s\n  Actual: %s", expected, actual)
+
+    local pos_id = name_mappings[test_name]
+    if not pos_id then
+      test_name = utils.replace_module_namespace(test_name)
+      pos_id = name_mappings[test_name]
+    end
 
     local line = tonumber(string.match(filepath, ":(%d+)$"))
-    local message = string.format("Expected: %s\n  Actual: %s", expected, actual)
-    local pos_id = name_mappings[test_name]
-
     if results[pos_id] then
       results[pos_id].status = "failed"
       results[pos_id].errors = {

@@ -29,15 +29,63 @@ M.replace_module_namespace = function(test_name)
 end
 
 ---@param position neotest.Position The position to return an ID for
----@param namespace neotest.Position[] Any namespaces the position is within
+---@param parents neotest.Position[] Parent positions for the position
 ---@return string
-M.generate_treesitter_id = function(position)
+M.generate_treesitter_id = function(position, parents)
   local cwd = async.fn.getcwd()
   local test_path = "." .. replace_paths(position.path, cwd, "")
   -- Treesitter starts line numbers from 0 so we subtract 1
   local id = test_path .. separator .. (tonumber(position.range[1]) + 1)
 
   return id
+end
+
+M.full_spec_name = function(tree)
+  local name = ""
+  local namespaces = {}
+  local num_namespaces = 0
+
+  if tree:data().type == "namespace" then
+    table.insert(namespaces, 1, tree:data().name)
+    num_namespaces = num_namespaces + 1
+  else
+    name = tree:data().name
+  end
+
+  for parent_node in tree:iter_parents() do
+    local data = parent_node:data()
+    if data.type == "namespace" then
+      table.insert(namespaces, 1, parent_node:data().name)
+      num_namespaces = num_namespaces + 1
+    else
+      break
+    end
+  end
+
+  if num_namespaces == 0 then return name end
+
+  -- build result
+  local result = ""
+
+  -- assemble namespaces
+  result = table.concat(namespaces, "::")
+
+  if name == "" then return result end
+
+  -- add # separator
+  result = result .. "#"
+  -- add test_ prefix
+  result = result .. "test_"
+  -- add index
+  for i, child_tree in ipairs(tree:parent():children()) do
+    for _, node in child_tree:iter_nodes() do
+      if node:data().id == tree:data().id then result = result .. string.format("%04d", i) end
+    end
+  end
+  -- add _[name]
+  result = result .. "_" .. name
+
+  return result
 end
 
 M.full_test_name = function(tree)
@@ -63,8 +111,11 @@ M.get_mappings = function(tree)
   local function name_map(tree)
     local data = tree:data()
     if data.type == "test" then
-      local full_name = M.full_test_name(tree)
-      mappings[full_name] = data.id
+      local full_spec_name = M.full_spec_name(tree)
+      mappings[full_spec_name] = data.id
+
+      local full_test_name = M.full_test_name(tree)
+      mappings[full_test_name] = data.id
     end
 
     for _, child in ipairs(tree:children()) do

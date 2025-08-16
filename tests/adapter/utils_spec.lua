@@ -19,6 +19,79 @@ describe("generate_treesitter_id", function()
   end)
 end)
 
+describe("full_spec_name", function()
+  it("concatenates namespaces with :: separator", function()
+    local tree = Tree.from_list({
+      { id = "namespace1", name = "namespace1", type = "namespace" },
+      {
+        { id = "namespace2", name = "namespace2", type = "namespace" },
+        {
+          { id = "namespace3", name = "namespace3", type = "namespace" },
+          {
+            { id = "test", name = "example" },
+          },
+        },
+      },
+    }, function(pos)
+      return pos.id
+    end)
+
+    assert.equals("namespace1::namespace2::namespace3", utils.full_spec_name(tree:children()[1]:children()[1]))
+    assert.equals(
+      "namespace1::namespace2::namespace3#test_0001_example",
+      utils.full_spec_name(tree:children()[1]:children()[1]:children()[1])
+    )
+  end)
+
+  it("includes a zero-padded test index", function()
+    local tree = Tree.from_list({
+      { id = "namespace1", name = "namespace1", type = "namespace" },
+      {
+        { id = "namespace2", name = "namespace2", type = "namespace" },
+        {
+          { id = "namespace3", name = "namespace3", type = "namespace" },
+          {
+            { id = "test1", name = "example1" },
+          },
+          {
+            { id = "test2", name = "example2" },
+          },
+          {
+            { id = "test3", name = "example3" },
+          },
+        },
+      },
+    }, function(pos)
+      return pos.id
+    end)
+    assert.equals(
+      "namespace1::namespace2::namespace3#test_0002_example2",
+      utils.full_spec_name(tree:children()[1]:children()[1]:children()[2])
+    )
+  end)
+
+  it("does not replace spaces with underscores", function()
+    local tree = Tree.from_list({
+      { id = "namespace1", name = "namespace1", type = "namespace" },
+      {
+        { id = "namespace2", name = "namespace2", type = "namespace" },
+        {
+          { id = "namespace3", name = "namespace3", type = "namespace" },
+          {
+            { id = "test", name = "this is a great test name" },
+          },
+        },
+      },
+    }, function(pos)
+      return pos.id
+    end)
+    assert.equals(
+      "namespace1::namespace2::namespace3#test_0001_this is a great test name",
+      utils.full_spec_name(tree:children()[1]:children()[1]:children()[1])
+    )
+  end)
+end)
+
 describe("full_test_name", function()
   it("returns the name of the test", function()
     local tree = Tree.from_list({ id = "test", name = "test_example" }, function(pos)
